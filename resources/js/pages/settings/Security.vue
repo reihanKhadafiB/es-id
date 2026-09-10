@@ -20,8 +20,10 @@ type Props = {
 
 const props = defineProps<Props>();
 
+import type { User } from '@/types';
+
 const page = usePage();
-const user = computed(() => page.props.auth.user);
+const user = computed(() => page.props.auth.user as User);
 
 const profileForm = useForm({
     name: user.value.name,
