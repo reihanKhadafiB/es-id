@@ -19,6 +19,7 @@ return new class extends Migration
 
         Schema::table('users', function (Blueprint $table) {
             $table->string('phone_number')->nullable(false)->unique()->change();
+            $table->dropUnique('users_email_unique');
             $table->dropColumn(['email', 'email_verified_at']);
         });
     }
