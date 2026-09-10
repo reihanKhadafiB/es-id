@@ -1,0 +1,17 @@
+{
+  "name": "EsTeh App - Kasir & Laporan",
+  "short_name": "EsTeh",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3f4f6",
+  "theme_color": "#2563eb",
+  "description": "Sistem Pencatatan Penjualan Es Teh (PWA)",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512 any",
+      "purpose": "any maskable"
+    }
+  ]
+}
