@@ -7,9 +7,9 @@ const name = usePage().props.name;
 
 <template>
     <div
-        class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-md"
+        class="flex aspect-square size-8 items-center justify-center rounded-md overflow-hidden bg-white/10"
     >
-        <AppLogoIcon class="size-5 fill-current text-white dark:text-black" />
+        <img src="/esid.png" alt="Logo" class="size-full object-contain" />
     </div>
     <div class="ml-1 grid flex-1 text-left text-sm">
         <span class="mb-0.5 truncate leading-tight font-semibold">{{

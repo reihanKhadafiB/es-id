@@ -1,70 +1,95 @@
-# Sistem Pencatatan Penjualan — Usaha Es (Es Teh, Pop Ice, Teh Jus)
+# ES.ID - Mobile Banking Web Application
 
-Sistem pencatatan penjualan untuk klien usaha minuman es (MVP). Fokus pada pencatatan transaksi kasir secara cepat dan laporan rekap akurat.
+ES.ID adalah aplikasi web dengan desain *mobile-banking* premium yang berfokus pada manajemen keuangan, transaksi, dan keamanan tingkat tinggi. Dibangun menggunakan teknologi terkini, aplikasi ini menawarkan pengalaman pengguna yang responsif (*seamless*), cepat, dan aman, termasuk dukungan penuh untuk autentikasi tanpa kata sandi (*Passkeys / Biometrik*).
 
-## Status Proyek: MVP Selesai (100%) ✅
+## 🚀 Fitur Utama
+- **Autentikasi Modern:** Login sangat aman menggunakan Passkeys (Face ID / Touch ID / Sidik Jari) via `laravel/passkeys` yang terintegrasi dengan Fortify.
+- **Desain Premium:** Antarmuka responsif bergaya M-Banking dengan efek visual premium menggunakan Tailwind CSS dan komponen Reka UI.
+- **Manajemen Keuangan:** Lacak transaksi harian, pengeluaran, dan statistik pendapatan dengan dasbor yang intuitif.
+- **Single Page Application (SPA):** Navigasi super cepat tanpa *reload* halaman menggunakan Inertia.js v3.
+- **Kustomisasi Cerdas:** Pengaturan profil, ubah kata sandi, hingga penanganan status *error* khusus (404, 500, dll.) yang disesuaikan dengan tema aplikasi.
+- **Laporan & Ekspor:** Fitur ekspor laporan data keuangan yang efisien.
 
-Proyek ini telah dikembangkan sepenuhnya dan siap digunakan di production (cPanel/Shared Hosting). 
-Berikut adalah fitur-fitur yang sudah berjalan:
-- **PWA Ready**: Aplikasi dapat diinstal ke layar utama (*Home Screen*) HP (Android & iOS).
-- **Responsive Mobile UI**: Desain antarmuka dioptimalkan untuk kasir menggunakan smartphone, dilengkapi *Bottom Navigation Bar*.
-- **Manajemen Kategori & Produk**: Mengatur produk yang dijual secara dinamis.
-- **Kasir (Catat Transaksi)**: Keranjang belanja real-time, dikelompokkan berdasarkan kategori. Terdapat *empty state* untuk mencegah *error*.
-- **Riwayat Penjualan**: Histori lengkap transaksi dengan fitur *Void* (Pembatalan tanpa menghapus data).
-- **Laporan Otomatis**: Rekap pendapatan (Harian/Mingguan/Bulanan) lengkap dengan **Breakdown Produk Terjual**.
+## 🛠️ Spesifikasi & Tech Stack
+Proyek ini dikembangkan dengan kerangka kerja dan pustaka modern:
+- **Backend:** Laravel 13 (PHP 8.3+)
+- **Frontend:** Vue 3 (Composition API), Inertia.js v3
+- **Styling & UI:** Tailwind CSS v3/v4, Reka UI, Lucide Icons
+- **Autentikasi & Keamanan:** Laravel Fortify & Laravel Passkeys
+- **Pengujian (Testing):** Pest PHP & Larastan
+- **Code Quality:** Laravel Pint (Linter) & PHPStan (Static Analysis)
+- **Tooling:** Vite, Wayfinder (Auto-generated Laravel Routes for frontend)
 
-## Stack Teknologi
+## 📦 Persyaratan Sistem (Prerequisites)
+Pastikan sistem operasi lokal Anda telah memenuhi persyaratan perangkat lunak berikut:
+- PHP >= 8.3
+- Composer >= 2.0
+- Node.js >= 20.x beserta `npm`
+- SQLite (Secara *default*) atau MySQL / PostgreSQL
 
-| Layer      | Pilihan                        |
-|------------|---------------------------------|
-| Framework  | Laravel 13 (`laravel/vue-starter-kit`, PHP ^8.3) |
-| Frontend   | Vue 3 + Inertia.js ^3.0 (SPA feel) |
-| Styling    | Tailwind CSS v4                 |
-| Auth       | Laravel Fortify (single user)   |
-| Database   | PostgreSQL                      |
-| Delivery   | Progressive Web App (PWA)       |
+## 🔧 Panduan Instalasi
+Ikuti langkah-langkah di bawah ini untuk mempersiapkan proyek ini di lingkungan pengembangan (*development*) lokal Anda:
 
-## Skema Database
+1. **Kloning Repositori**
+   ```bash
+   git clone <URL_REPOSITORY_ANDA>
+   cd es-id
+   ```
 
-- **users**: Satu akun Admin saja.
-- **categories**: Menyimpan kategori produk (mis. "Minuman Dingin").
-- **products**: Menyimpan daftar menu beserta harga.
-- **transactions**: Data header transaksi (tanggal, total tagihan, status `completed`/`voided`).
-- **transaction_items**: Data detail item yang dibeli (*snapshot* nama & harga untuk menjaga integritas data histori).
-
-## Cara Menjalankan di Lokal (Development)
-
-1. Pastikan PostgreSQL berjalan dan sesuaikan kredensial di file `.env`.
-2. Install dependensi PHP dan Node:
+2. **Instalasi Dependensi PHP & JavaScript**
    ```bash
    composer install
    npm install
    ```
-3. Jalankan migrasi dan buat akun Admin (karena fitur register publik dinonaktifkan):
-   ```bash
-   php artisan migrate
-   php artisan tinker
-   # Jalankan di tinker:
-   # App\Models\User::create(['name' => 'Admin', 'email' => 'admin@es.id', 'password' => bcrypt('password')]);
-   ```
-4. Jalankan server backend dan frontend sekaligus dengan satu perintah:
-   ```bash
-   npm run serve
-   ```
-5. Buka `http://localhost:8000` di browser dan login.
 
-## Panduan Deployment (Shared Hosting cPanel)
+3. **Pengaturan Environment (Konfigurasi Aplikasi)**
+   Salin *file* `.env.example` menjadi `.env`, lalu hasilkan *application key* untuk enkripsi:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-1. Lakukan *build* aset frontend secara lokal:
+4. **Konfigurasi Database**
+   Secara *default*, proyek ini menggunakan SQLite. Buat *file* databasenya secara manual lalu jalankan *migration*:
    ```bash
-   npm run build
+   touch database/database.sqlite
+   php artisan migrate --seed
    ```
-2. Upload seluruh folder project (termasuk folder `public/build/`) ke server hosting via ZIP/FTP.
-   *(Folder `node_modules/` tidak perlu diupload)*
-3. Ubah pengaturan *Document Root* domain Anda untuk mengarah ke direktori `public/`.
-4. Sesuaikan file `.env` di server (Koneksi Database PostgreSQL).
-5. Jalankan migrasi di server hosting (jika cPanel memiliki fitur terminal):
-   ```bash
-   php artisan migrate
-   ```
-6. **Syarat PWA**: Pastikan website sudah menggunakan HTTPS / SSL aktif agar *Service Worker* dapat berjalan dan tombol "Install App" muncul di browser pengunjung.
+
+## 🚀 Cara Menjalankan Aplikasi
+
+Untuk menjalankan aplikasi secara lokal dalam mode pengembangan, Laravel telah menyediakan skrip *concurrent* praktis. Cukup jalankan perintah berikut di dalam terminal Anda:
+
+```bash
+npm run serve
+```
+*(Perintah ini akan secara otomatis menjalankan peladen backend `php artisan serve` dan proses kompilasi frontend `npm run dev` secara bersamaan)*
+
+Sebagai alternatif, Anda juga bisa menjalankannya di dua jendela terminal secara terpisah:
+```bash
+# Terminal 1 (Backend Laravel)
+php artisan serve
+
+# Terminal 2 (Kompilasi Frontend Vite/Vue)
+npm run dev
+```
+
+Buka peramban (*browser*) Anda dan akses aplikasi di: **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
+
+## 🧪 Pengujian Otomatis (Testing)
+Aplikasi ini menggunakan Pest untuk pengujian struktural. Untuk menjalankan seluruh rangkaian *unit test* dan *feature test*, jalankan perintah berikut:
+```bash
+npm run test
+# -- Atau --
+php artisan test
+```
+
+Untuk memeriksa standar pengodean (*code style*) menggunakan Laravel Pint:
+```bash
+npm run lint:check
+# Jika ingin memperbaiki format otomatis:
+npm run lint
+```
+
+## 📝 Lisensi
+Proyek ini dilisensikan di bawah [MIT License](https://opensource.org/licenses/MIT).

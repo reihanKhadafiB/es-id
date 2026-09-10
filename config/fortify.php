@@ -45,9 +45,9 @@ return [
     |
     */
 
-    'username' => 'email',
+    'username' => 'phone_number',
 
-    'email' => 'email',
+    'email' => 'phone_number',
 
     /*
     |--------------------------------------------------------------------------
@@ -144,6 +144,23 @@ return [
 
     'features' => [
         Features::resetPasswords(),
+        Features::passkeys(),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Options
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify additional configuration options for the various
+    | features provided by Fortify.
+    |
+    */
+
+    'options' => [
+        'passkeys' => [
+            'confirmPassword' => false,
+        ],
     ],
 
 ];

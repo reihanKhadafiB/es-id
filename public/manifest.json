@@ -1,6 +1,6 @@
 {
-  "name": "EsTeh App - Kasir & Laporan",
-  "short_name": "EsTeh",
+  "name": "ES.ID - Kasir & Laporan",
+  "short_name": "ES.ID",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f3f4f6",
@@ -8,9 +8,19 @@
   "description": "Sistem Pencatatan Penjualan Es Teh (PWA)",
   "icons": [
     {
+      "src": "/favicon.ico",
+      "type": "image/x-icon",
+      "sizes": "64x64 32x32 24x24 16x16"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180"
+    },
+    {
       "src": "/favicon.svg",
       "type": "image/svg+xml",
-      "sizes": "192x192 512x512 any",
+      "sizes": "any",
       "purpose": "any maskable"
     }
   ]

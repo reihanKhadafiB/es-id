@@ -1,12 +1,17 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
+import { Head, usePage, useForm } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+import { toast } from 'vue-sonner';
+import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { edit } from '@/routes/security';
+import { Passkeys } from '@laravel/passkeys';
 
 // oxfmt-ignore
 type Props = {
@@ -15,11 +20,78 @@ type Props = {
 
 const props = defineProps<Props>();
 
+const page = usePage();
+const user = computed(() => page.props.auth.user);
+
+const profileForm = useForm({
+    name: user.value.name,
+    phone_number: user.value.phone_number,
+});
+
+const submitProfile = () => {
+    profileForm.patch(ProfileController.update.url(), {
+        preserveScroll: true,
+        onSuccess: () => toast.success('Profil berhasil disimpan!'),
+        onError: () => toast.error('Gagal menyimpan profil, periksa kembali data Anda.')
+    });
+};
+
+const passwordForm = useForm({
+    current_password: '',
+    password: '',
+    password_confirmation: '',
+});
+
+const submitPassword = () => {
+    passwordForm.put(SecurityController.update.url(), {
+        preserveScroll: true,
+        onSuccess: () => {
+            passwordForm.reset();
+            toast.success('Kata sandi berhasil diganti!');
+        },
+        onError: () => {
+            toast.error('Gagal mengganti kata sandi, periksa kembali data yang Anda masukkan.');
+            passwordForm.reset('password', 'password_confirmation');
+            
+            // Fokuskan kembali ke input yang error (opsional tapi bagus untuk UX)
+            if (passwordForm.errors.current_password) {
+                document.getElementById('current_password')?.focus();
+            } else if (passwordForm.errors.password) {
+                document.getElementById('password')?.focus();
+            }
+        }
+    });
+};
+
+const isRegisteringPasskey = ref(false);
+const passkeyMessage = ref('');
+const passkeyError = ref(false);
+
+const registerPasskey = async () => {
+    isRegisteringPasskey.value = true;
+    passkeyMessage.value = '';
+    passkeyError.value = false;
+    
+    try {
+        await Passkeys.register({ name: 'Perangkat Ini' });
+        passkeyMessage.value = 'Perangkat berhasil didaftarkan untuk login Biometrik!';
+    } catch (e: any) {
+        passkeyError.value = true;
+        if (e.message) {
+             passkeyMessage.value = e.message;
+        } else {
+             passkeyMessage.value = 'Gagal mendaftarkan perangkat. Pastikan browser Anda mendukung WebAuthn.';
+        }
+    } finally {
+        isRegisteringPasskey.value = false;
+    }
+};
+
 defineOptions({
     layout: {
         breadcrumbs: [
             {
-                title: 'Security settings',
+                title: 'Pengaturan Akun',
                 href: edit(),
             },
         ],
@@ -28,77 +100,151 @@ defineOptions({
 </script>
 
 <template>
-    <Head title="Security settings" />
+    <Head title="Pengaturan Akun" />
 
-    <h1 class="sr-only">Security settings</h1>
+    <h1 class="sr-only">Pengaturan Akun</h1>
 
     <div class="space-y-6">
+        <!-- Update Profile / Phone Number -->
         <Heading
             variant="small"
-            title="Update password"
-            description="Ensure your account is using a long, random password to stay secure"
+            title="Profil Pengguna"
+            description="Ubah nama atau nomor telepon yang digunakan untuk login"
         />
 
-        <Form
-            v-bind="SecurityController.update.form()"
-            :options="{
-                preserveScroll: true,
-            }"
-            reset-on-success
-            :reset-on-error="[
-                'password',
-                'password_confirmation',
-                'current_password',
-            ]"
+        <form
+            @submit.prevent="submitProfile"
             class="space-y-6"
-            v-slot="{ errors, processing }"
         >
-            <div class="grid gap-2">
-                <Label for="current_password">Current password</Label>
+            <div class="flex flex-col gap-1.5">
+                <Label for="name" class="text-xs font-bold text-gray-700 uppercase tracking-wider ml-1">Nama Lengkap</Label>
+                <input
+                    id="name"
+                    class="h-14 w-full bg-white border border-gray-200 rounded-2xl px-5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+                    name="name"
+                    v-model="profileForm.name"
+                    required
+                    autocomplete="name"
+                    placeholder="Nama Lengkap"
+                />
+                <InputError class="ml-1" :message="profileForm.errors.name" />
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+                <Label for="phone_number" class="text-xs font-bold text-gray-700 uppercase tracking-wider ml-1">Nomor Telepon</Label>
+                <input
+                    id="phone_number"
+                    type="tel"
+                    class="h-14 w-full bg-white border border-gray-200 rounded-2xl px-5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+                    name="phone_number"
+                    v-model="profileForm.phone_number"
+                    required
+                    autocomplete="tel"
+                    placeholder="081234567890"
+                />
+                <InputError class="ml-1" :message="profileForm.errors.phone_number" />
+            </div>
+
+            <div class="mt-2">
+                <button 
+                    type="submit"
+                    :disabled="profileForm.processing" 
+                    data-test="update-profile-button"
+                    class="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-full font-bold shadow-lg shadow-blue-500/30 flex justify-center items-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                    SIMPAN PERUBAHAN PROFIL
+                </button>
+            </div>
+        </form>
+
+        <div class="pt-8 mt-8 border-t border-gray-200 space-y-6">
+            <Heading
+                variant="small"
+                title="Ganti Kata Sandi"
+                description="Pastikan akun Anda menggunakan kata sandi yang panjang dan acak agar tetap aman"
+            />
+
+        <form
+            @submit.prevent="submitPassword"
+            class="space-y-6"
+        >
+            <div class="flex flex-col gap-1.5">
+                <Label for="current_password" class="text-xs font-bold text-gray-700 uppercase tracking-wider ml-1">Kata Sandi Saat Ini</Label>
                 <PasswordInput
                     id="current_password"
                     name="current_password"
-                    class="mt-1 block w-full"
+                    class="h-14 w-full bg-white dark:bg-white border border-gray-200 dark:border-gray-200 rounded-2xl px-5 text-gray-900 dark:text-gray-900 placeholder:text-gray-400 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
                     autocomplete="current-password"
-                    placeholder="Current password"
+                    placeholder="••••••••"
+                    v-model="passwordForm.current_password"
                 />
-                <InputError :message="errors.current_password" />
+                <InputError class="ml-1" :message="passwordForm.errors.current_password" />
             </div>
 
-            <div class="grid gap-2">
-                <Label for="password">New password</Label>
+            <div class="flex flex-col gap-1.5">
+                <Label for="password" class="text-xs font-bold text-gray-700 uppercase tracking-wider ml-1">Kata Sandi Baru</Label>
                 <PasswordInput
                     id="password"
                     name="password"
-                    class="mt-1 block w-full"
+                    class="h-14 w-full bg-white dark:bg-white border border-gray-200 dark:border-gray-200 rounded-2xl px-5 text-gray-900 dark:text-gray-900 placeholder:text-gray-400 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
                     autocomplete="new-password"
-                    placeholder="New password"
+                    placeholder="••••••••"
                     :passwordrules="props.passwordRules"
+                    v-model="passwordForm.password"
                 />
-                <InputError :message="errors.password" />
+                <InputError class="ml-1" :message="passwordForm.errors.password" />
             </div>
 
-            <div class="grid gap-2">
-                <Label for="password_confirmation">Confirm password</Label>
+            <div class="flex flex-col gap-1.5">
+                <Label for="password_confirmation" class="text-xs font-bold text-gray-700 uppercase tracking-wider ml-1">Konfirmasi Kata Sandi</Label>
                 <PasswordInput
                     id="password_confirmation"
                     name="password_confirmation"
-                    class="mt-1 block w-full"
+                    class="h-14 w-full bg-white dark:bg-white border border-gray-200 dark:border-gray-200 rounded-2xl px-5 text-gray-900 dark:text-gray-900 placeholder:text-gray-400 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
                     autocomplete="new-password"
-                    placeholder="Confirm password"
+                    placeholder="••••••••"
                     :passwordrules="props.passwordRules"
+                    v-model="passwordForm.password_confirmation"
                 />
-                <InputError :message="errors.password_confirmation" />
+                <InputError class="ml-1" :message="passwordForm.errors.password_confirmation" />
             </div>
 
-            <div class="flex items-center gap-4">
-                <Button
-                    :disabled="processing"
+            <div class="mt-2">
+                <button
+                    type="submit"
+                    :disabled="passwordForm.processing"
                     data-test="update-password-button"
+                    class="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-full font-bold shadow-lg shadow-blue-500/30 flex justify-center items-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                    Save
-                </Button>
+                    GANTI KATA SANDI
+                </button>
             </div>
-        </Form>
+        </form>
+        </div>
+
+        <div class="pt-8 mt-8 border-t border-gray-200 space-y-6">
+            <Heading
+                variant="small"
+                title="Biometric Login (Face ID / Fingerprint)"
+                description="Daftarkan perangkat ini agar Anda bisa login dengan aman dan cepat menggunakan wajah atau sidik jari tanpa perlu memasukkan kata sandi."
+            />
+            
+            <div class="flex flex-col gap-3 mt-4">
+                <button 
+                    @click="registerPasskey" 
+                    type="button" 
+                    :disabled="isRegisteringPasskey" 
+                    class="w-full h-14 bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 rounded-full font-bold shadow-sm flex justify-center items-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                    <svg v-if="!isRegisteringPasskey" class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>
+                    <span v-if="!isRegisteringPasskey" class="text-[15px] tracking-wide">Daftarkan Face ID / Sidik Jari</span>
+                    <span v-else class="text-[15px] tracking-wide">Mendaftarkan...</span>
+                </button>
+                
+                <div v-if="passkeyMessage" class="text-sm font-medium mt-2 text-center" :class="passkeyError ? 'text-red-600' : 'text-green-600'">
+                    {{ passkeyMessage }}
+                </div>
+            </div>
+        </div>
     </div>
 </template>

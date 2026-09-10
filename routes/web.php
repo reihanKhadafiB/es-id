@@ -6,6 +6,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TransactionController;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\Route;
+use Laravel\Passkeys\Passkeys;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -22,22 +23,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->where('created_at', '>=', $today)
             ->selectRaw('count(*) as count, sum(total) as revenue')
             ->first();
+            
+        $expenses = \App\Models\Expense::where('expense_date', $today->format('Y-m-d'))
+            ->sum('amount');
 
         return inertia('Dashboard', [
             'today_transactions' => $stats->count ?? 0,
             'today_revenue' => $stats->revenue ?? 0,
+            'today_expenses' => (int) $expenses,
         ]);
     })->name('dashboard');
 
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::resource('products', ProductController::class)->except(['show']);
 
-    Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.index');
-    Route::get('transactions/create', [TransactionController::class, 'create'])->name('transactions.create');
-    Route::post('transactions', [TransactionController::class, 'store'])->name('transactions.store');
-    Route::put('transactions/{transaction}/void', [TransactionController::class, 'void'])->name('transactions.void');
+    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/transactions/export', [TransactionController::class, 'export'])->name('transactions.export');
+    Route::get('/transactions/create', [TransactionController::class, 'create'])->name('transactions.create');
+    Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
+    Route::put('/transactions/{transaction}/void', [TransactionController::class, 'void'])->name('transactions.void');
 
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
+
+    Route::resource('expenses', \App\Http\Controllers\ExpenseController::class)->only(['index', 'store', 'destroy']);
 });
 
 require __DIR__.'/settings.php';

@@ -3,7 +3,14 @@ import { Head, Link } from '@inertiajs/vue3';
 import MobileAppLayout from '@/layouts/MobileAppLayout.vue';
 
 const props = defineProps<{
-    reports: Array<{ date: string, total_revenue: number, total_transactions: number, breakdown: Record<string, number> }>;
+    reports: Array<{ 
+        date: string, 
+        total_revenue: number, 
+        total_expenses: number, 
+        net_profit: number, 
+        total_transactions: number, 
+        breakdown: Record<string, number> 
+    }>;
     period: string;
 }>();
 
@@ -39,9 +46,15 @@ const periods = [
     <Head title="Laporan Penjualan" />
 
     <div class="space-y-6 flex flex-col h-full">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">Laporan</h1>
-            <p class="text-sm text-gray-500">Rekap penjualan (exclude void)</p>
+        <div class="flex justify-between items-start">
+            <div>
+                <h1 class="text-xl font-bold text-gray-900">Laporan</h1>
+                <p class="text-xs text-gray-500">Rekap penjualan & pengeluaran</p>
+            </div>
+            <a :href="'/reports/export?period=' + period" target="_blank" class="bg-green-600 hover:bg-green-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Export Excel
+            </a>
         </div>
 
         <!-- Tab Navigasi -->
@@ -58,11 +71,21 @@ const periods = [
             <div v-for="report in reports" :key="report.date" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="font-bold text-gray-800">{{ formatDate(report.date) }}</h3>
-                    <span class="bg-blue-50 text-blue-700 text-xs font-bold px-2 py-1 rounded">{{ report.total_transactions }} Trx</span>
+                    <span class="bg-blue-50 text-blue-700 text-xs font-bold px-2 py-1 rounded">{{ report.total_transactions }} Transaksi</span>
                 </div>
-                <div class="flex justify-between items-end border-t border-gray-50 pt-2 mt-2">
-                    <span class="text-xs text-gray-500 uppercase tracking-wider">Total Pendapatan</span>
-                    <span class="font-bold text-xl text-green-600">{{ formatCurrency(report.total_revenue) }}</span>
+                <div class="flex flex-col gap-2 border-t border-gray-50 pt-2 mt-2">
+                    <div class="flex justify-between items-end">
+                        <span class="text-xs text-gray-500 uppercase tracking-wider">Pendapatan</span>
+                        <span class="font-semibold text-sm text-gray-800">{{ formatCurrency(report.total_revenue) }}</span>
+                    </div>
+                    <div class="flex justify-between items-end">
+                        <span class="text-xs text-gray-500 uppercase tracking-wider">Pengeluaran</span>
+                        <span class="font-semibold text-sm text-red-500">-{{ formatCurrency(report.total_expenses) }}</span>
+                    </div>
+                    <div class="flex justify-between items-end pt-2 border-t border-dashed border-gray-200">
+                        <span class="text-[11px] font-bold text-gray-600 uppercase tracking-wider">Laba Bersih</span>
+                        <span class="font-bold text-xl text-green-600">{{ formatCurrency(report.net_profit) }}</span>
+                    </div>
                 </div>
                 <!-- Breakdown Produk -->
                 <div v-if="Object.keys(report.breakdown).length > 0" class="mt-3 pt-3 border-t border-gray-100">
