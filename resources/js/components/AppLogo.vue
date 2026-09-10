@@ -7,7 +7,7 @@ const name = usePage().props.name;
 
 <template>
     <div
-        class="flex aspect-square size-8 items-center justify-center rounded-md overflow-hidden bg-white/10"
+        class="flex aspect-square size-8 items-center justify-center overflow-hidden rounded-md bg-white/10"
     >
         <img src="/esid.png" alt="Logo" class="size-full object-contain" />
     </div>

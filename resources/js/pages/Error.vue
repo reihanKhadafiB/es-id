@@ -8,23 +8,27 @@ const props = defineProps<{
 }>();
 
 const title = computed(() => {
-    return {
-        503: 'Layanan Tidak Tersedia',
-        500: 'Kesalahan Server',
-        404: 'Halaman Tidak Ditemukan',
-        403: 'Akses Ditolak',
-        401: 'Sesi Berakhir',
-    }[props.status] || 'Terjadi Kesalahan';
+    return (
+        {
+            503: 'Layanan Tidak Tersedia',
+            500: 'Kesalahan Server',
+            404: 'Halaman Tidak Ditemukan',
+            403: 'Akses Ditolak',
+            401: 'Sesi Berakhir',
+        }[props.status] || 'Terjadi Kesalahan'
+    );
 });
 
 const description = computed(() => {
-    return {
-        503: 'Maaf, layanan sedang dalam pemeliharaan. Silakan coba beberapa saat lagi.',
-        500: 'Wah, sepertinya ada masalah di peladen (server) kami. Kami sedang memperbaikinya.',
-        404: 'Halaman yang Anda tuju tidak dapat ditemukan. Mungkin tautannya salah atau halaman sudah dihapus.',
-        403: 'Anda tidak memiliki hak akses untuk membuka halaman ini.',
-        401: 'Sesi login Anda telah berakhir. Silakan login kembali untuk melanjutkan.',
-    }[props.status] || 'Maaf, terjadi kesalahan yang tidak terduga.';
+    return (
+        {
+            503: 'Maaf, layanan sedang dalam pemeliharaan. Silakan coba beberapa saat lagi.',
+            500: 'Wah, sepertinya ada masalah di peladen (server) kami. Kami sedang memperbaikinya.',
+            404: 'Halaman yang Anda tuju tidak dapat ditemukan. Mungkin tautannya salah atau halaman sudah dihapus.',
+            403: 'Anda tidak memiliki hak akses untuk membuka halaman ini.',
+            401: 'Sesi login Anda telah berakhir. Silakan login kembali untuk melanjutkan.',
+        }[props.status] || 'Maaf, terjadi kesalahan yang tidak terduga.'
+    );
 });
 
 const illustration = computed(() => {
@@ -51,29 +55,51 @@ export default {
 
 <template>
     <Head :title="title" />
-    <div class="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center space-y-6">
+    <div
+        class="flex min-h-[60vh] flex-col items-center justify-center space-y-6 px-6 text-center"
+    >
         <!-- Error Illustration -->
-        <div class="relative w-32 h-32 flex items-center justify-center bg-blue-50 rounded-full shadow-inner mb-4">
-            <div class="absolute inset-0 bg-blue-100 rounded-full animate-pulse opacity-50"></div>
-            <svg class="w-16 h-16 text-blue-600 relative z-10" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" :d="illustration" />
+        <div
+            class="relative mb-4 flex h-32 w-32 items-center justify-center rounded-full bg-blue-50 shadow-inner"
+        >
+            <div
+                class="absolute inset-0 animate-pulse rounded-full bg-blue-100 opacity-50"
+            ></div>
+            <svg
+                class="relative z-10 h-16 w-16 text-blue-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    :d="illustration"
+                />
             </svg>
-            <div class="absolute -bottom-2 -right-2 bg-white rounded-full p-2 shadow-md">
-                <span class="text-xs font-bold text-gray-800">{{ status }}</span>
+            <div
+                class="absolute -right-2 -bottom-2 rounded-full bg-white p-2 shadow-md"
+            >
+                <span class="text-xs font-bold text-gray-800">{{
+                    status
+                }}</span>
             </div>
         </div>
 
         <div class="space-y-3">
-            <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">{{ title }}</h1>
-            <p class="text-sm text-gray-500 leading-relaxed max-w-xs mx-auto">
+            <h1 class="text-2xl font-extrabold tracking-tight text-gray-900">
+                {{ title }}
+            </h1>
+            <p class="mx-auto max-w-xs text-sm leading-relaxed text-gray-500">
                 {{ description }}
             </p>
         </div>
 
-        <div class="pt-8 w-full">
+        <div class="w-full pt-8">
             <Link
                 href="/dashboard"
-                class="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-full font-bold shadow-lg shadow-blue-500/30 flex justify-center items-center transition-all active:scale-[0.98]"
+                class="flex h-14 w-full items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-blue-500 font-bold text-white shadow-lg shadow-blue-500/30 transition-all hover:from-blue-700 hover:to-blue-600 active:scale-[0.98]"
             >
                 KEMBALI KE BERANDA
             </Link>
