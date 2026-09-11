@@ -7,12 +7,15 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Inertia\Response;
+use Illuminate\Http\RedirectResponse;
 use OpenSpout\Common\Entity\Style\Style;
 use Rap2hpoutre\FastExcel\FastExcel;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TransactionController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
         $month = $request->get('month', date('Y-m'));
         $year = substr($month, 0, 4);
@@ -36,7 +39,7 @@ class TransactionController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(): Response
     {
         $categories = Category::with(['products' => function ($q) {
             $q->where('is_active', true);
@@ -47,7 +50,7 @@ class TransactionController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'total' => 'required|integer|min:0',
@@ -82,7 +85,7 @@ class TransactionController extends Controller
         return redirect()->route('transactions.index')->with('success', 'Transaksi berhasil disimpan.');
     }
 
-    public function void(Transaction $transaction)
+    public function void(Transaction $transaction): RedirectResponse
     {
         $transaction->update([
             'status' => 'voided',
@@ -92,7 +95,7 @@ class TransactionController extends Controller
         return back()->with('success', 'Transaksi dibatalkan.');
     }
 
-    public function export(Request $request)
+    public function export(Request $request): StreamedResponse|string
     {
         $month = $request->get('month', date('Y-m'));
         $year = substr($month, 0, 4);
@@ -111,7 +114,7 @@ class TransactionController extends Controller
             })->join(', ');
 
             $exportData->push([
-                'ID Transaksi' => 'ESID-'.str_pad($trx->id, 5, '0', STR_PAD_LEFT),
+                'ID Transaksi' => 'ESID-'.str_pad((string)$trx->id, 5, '0', STR_PAD_LEFT),
                 'Waktu' => $trx->created_at->format('Y-m-d H:i:s'),
                 'Kasir' => $trx->user->name ?? '-',
                 'Total (Rp)' => $trx->total,
