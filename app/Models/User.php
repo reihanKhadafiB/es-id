@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Passkeys\Contracts\PasskeyUser;
 use Laravel\Passkeys\PasskeyAuthenticatable;
 
@@ -54,12 +55,14 @@ class User extends Authenticatable implements PasskeyUser
         return $this->name;
     }
 
-    public function transactions()
+    /** @return HasMany<Transaction, $this> */
+    public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
     }
 
-    public function expenses()
+    /** @return HasMany<Expense, $this> */
+    public function expenses(): HasMany
     {
         return $this->hasMany(Expense::class);
     }
