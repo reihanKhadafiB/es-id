@@ -11,3 +11,11 @@ parameters:
         - routes/
 
     level: 7
+
+    ignoreErrors:
+        -
+            message: '#Call to method download\(\) on an unknown class Rap2hpoutre\\FastExcel\\Exportable\.#'
+            path: app/Http/Controllers/ReportController.php
+        -
+            message: '#Call to method download\(\) on an unknown class Rap2hpoutre\\FastExcel\\Exportable\.#'
+            path: app/Http/Controllers/TransactionController.php
