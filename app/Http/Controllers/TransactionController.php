@@ -7,6 +7,8 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use OpenSpout\Common\Entity\Style\Style;
+use Rap2hpoutre\FastExcel\FastExcel;
 
 class TransactionController extends Controller
 {
@@ -105,11 +107,11 @@ class TransactionController extends Controller
         $exportData = collect();
         foreach ($transactions as $trx) {
             $items = $trx->items->map(function ($item) {
-                return $item->product_name . ' (x' . $item->qty . ')';
+                return $item->product_name.' (x'.$item->qty.')';
             })->join(', ');
 
             $exportData->push([
-                'ID Transaksi' => 'ESID-' . str_pad($trx->id, 5, '0', STR_PAD_LEFT),
+                'ID Transaksi' => 'ESID-'.str_pad($trx->id, 5, '0', STR_PAD_LEFT),
                 'Waktu' => $trx->created_at->format('Y-m-d H:i:s'),
                 'Kasir' => $trx->user->name ?? '-',
                 'Total (Rp)' => $trx->total,
@@ -119,11 +121,11 @@ class TransactionController extends Controller
             ]);
         }
 
-        $headerStyle = (new \OpenSpout\Common\Entity\Style\Style())
+        $headerStyle = (new Style)
             ->setFontBold()
             ->setBackgroundColor('E2E8F0');
 
-        return (new \Rap2hpoutre\FastExcel\FastExcel($exportData))
+        return (new FastExcel($exportData))
             ->headerStyle($headerStyle)
             ->download("Riwayat_Mutasi_ESID_{$month}.xlsx");
     }
