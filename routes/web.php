@@ -1,12 +1,13 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TransactionController;
+use App\Models\Expense;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\Route;
-use Laravel\Passkeys\Passkeys;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -23,8 +24,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->where('created_at', '>=', $today)
             ->selectRaw('count(*) as count, sum(total) as revenue')
             ->first();
-            
-        $expenses = \App\Models\Expense::where('expense_date', $today->format('Y-m-d'))
+
+        $expenses = Expense::where('expense_date', $today->format('Y-m-d'))
             ->sum('amount');
 
         return inertia('Dashboard', [
@@ -46,7 +47,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
 
-    Route::resource('expenses', \App\Http\Controllers\ExpenseController::class)->only(['index', 'store', 'destroy']);
+    Route::resource('expenses', ExpenseController::class)->only(['index', 'store', 'destroy']);
 });
 
 require __DIR__.'/settings.php';
