@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
         return Inertia::render('Products/Index', [
             'products' => Product::with('category')->get(),
@@ -17,7 +19,7 @@ class ProductController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
@@ -31,7 +33,7 @@ class ProductController extends Controller
         return back()->with('success', 'Produk ditambahkan.');
     }
 
-    public function update(Request $request, Product $product)
+    public function update(Request $request, Product $product): RedirectResponse
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
@@ -45,7 +47,7 @@ class ProductController extends Controller
         return back()->with('success', 'Produk diupdate.');
     }
 
-    public function destroy(Product $product)
+    public function destroy(Product $product): RedirectResponse
     {
         $product->delete();
 
