@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Expense;
 use Illuminate\Http\Request;
 
 class ExpenseController extends Controller
@@ -9,7 +10,7 @@ class ExpenseController extends Controller
     public function index()
     {
         return Inertia::render('Expenses/Index', [
-            'expenses' => \App\Models\Expense::latest()->get(),
+            'expenses' => Expense::latest()->get(),
         ]);
     }
 
@@ -26,7 +27,7 @@ class ExpenseController extends Controller
         return back()->with('success', 'Pengeluaran berhasil dicatat.');
     }
 
-    public function destroy(\App\Models\Expense $expense)
+    public function destroy(Expense $expense)
     {
         $expense->delete();
 
