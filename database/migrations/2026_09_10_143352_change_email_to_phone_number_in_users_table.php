@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('phone_number')->nullable()->after('name');
         });
 
-        \DB::table('users')->update(['phone_number' => '085880459587']);
+        DB::table('users')->update(['phone_number' => '085880459587']);
 
         Schema::table('users', function (Blueprint $table) {
             $table->string('phone_number')->nullable(false)->unique()->change();
