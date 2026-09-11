@@ -39,7 +39,7 @@ class ReportController extends Controller
 
             $dayExpenses = $expenses->filter(function ($expense) use ($date) {
                 // Assuming $date is like '2026-09-10 00:00:00', we take the date part
-                return substr(Carbon::parse($expense->expense_date)->format('Y-m-d'), 0, 10) === substr((string)$date, 0, 10);
+                return substr(Carbon::parse($expense->expense_date)->format('Y-m-d'), 0, 10) === substr((string) $date, 0, 10);
             });
             $totalExpenses = $dayExpenses->sum('amount');
 
@@ -107,7 +107,7 @@ class ReportController extends Controller
             } elseif ($period === 'weekly') {
                 $parts = explode('-W', $date);
                 if (count($parts) == 2) {
-                    $startOfWeek = Carbon::now()->setISODate((int)$parts[0], (int)$parts[1])->startOfWeek();
+                    $startOfWeek = Carbon::now()->setISODate((int) $parts[0], (int) $parts[1])->startOfWeek();
                     $endOfWeek = $startOfWeek->copy()->endOfWeek();
                     $labelPeriode = $startOfWeek->translatedFormat('d M Y').' - '.$endOfWeek->translatedFormat('d M Y');
                 }

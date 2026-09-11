@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Transaction;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 use OpenSpout\Common\Entity\Style\Style;
 use Rap2hpoutre\FastExcel\FastExcel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -114,7 +114,7 @@ class TransactionController extends Controller
             })->join(', ');
 
             $exportData->push([
-                'ID Transaksi' => 'ESID-'.str_pad((string)$trx->id, 5, '0', STR_PAD_LEFT),
+                'ID Transaksi' => 'ESID-'.str_pad((string) $trx->id, 5, '0', STR_PAD_LEFT),
                 'Waktu' => $trx->created_at->format('Y-m-d H:i:s'),
                 'Kasir' => $trx->user->name ?? '-',
                 'Total (Rp)' => $trx->total,
