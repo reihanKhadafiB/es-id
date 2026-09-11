@@ -7,12 +7,14 @@ use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 use OpenSpout\Common\Entity\Style\Style;
 use Rap2hpoutre\FastExcel\FastExcel;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
         $period = $request->get('period', 'daily');
 
@@ -37,7 +39,7 @@ class ReportController extends Controller
 
             $dayExpenses = $expenses->filter(function ($expense) use ($date) {
                 // Assuming $date is like '2026-09-10 00:00:00', we take the date part
-                return substr($expense->expense_date->format('Y-m-d'), 0, 10) === substr($date, 0, 10);
+                return substr(Carbon::parse($expense->expense_date)->format('Y-m-d'), 0, 10) === substr((string)$date, 0, 10);
             });
             $totalExpenses = $dayExpenses->sum('amount');
 
@@ -69,7 +71,7 @@ class ReportController extends Controller
         ]);
     }
 
-    public function export(Request $request)
+    public function export(Request $request): StreamedResponse|string
     {
         $period = $request->get('period', 'daily');
 
@@ -84,11 +86,11 @@ class ReportController extends Controller
 
         // Group by period
         $days = $transactions->groupBy(function ($t) use ($format) {
-            return $t->created_at->format($format);
+            return Carbon::parse($t->created_at)->format($format);
         });
 
         $expenseDays = $expenses->groupBy(function ($e) use ($format) {
-            return $e->expense_date->format($format);
+            return Carbon::parse($e->expense_date)->format($format);
         });
 
         $allDates = $days->keys()->merge($expenseDays->keys())->unique()->sort()->reverse();
@@ -105,7 +107,7 @@ class ReportController extends Controller
             } elseif ($period === 'weekly') {
                 $parts = explode('-W', $date);
                 if (count($parts) == 2) {
-                    $startOfWeek = Carbon::now()->setISODate($parts[0], $parts[1])->startOfWeek();
+                    $startOfWeek = Carbon::now()->setISODate((int)$parts[0], (int)$parts[1])->startOfWeek();
                     $endOfWeek = $startOfWeek->copy()->endOfWeek();
                     $labelPeriode = $startOfWeek->translatedFormat('d M Y').' - '.$endOfWeek->translatedFormat('d M Y');
                 }
